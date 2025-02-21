@@ -1,0 +1,152 @@
+#include<iostream>
+using namespace std;
+
+class Node {
+public:
+    int player_id, score;
+    Node* left;
+    Node* right;
+
+    Node(int player_id, int score) {
+        this->player_id = player_id;
+        this->score = score;
+        left = NULL;
+        right = NULL;
+    }
+};
+
+class AVL {
+public:
+    int height(Node* root) {
+        if (root == NULL) {
+            return 0;
+        }
+        int hl = height(root->left);
+        int hr = height(root->right);
+        return max(hl, hr) + 1;
+    }
+
+    int balanceFactor(Node* root) {
+        if (root == NULL) {
+            return 0;
+        }
+        return height(root->left) - height(root->right);
+    }
+
+    Node* leftRotate(Node* root) {
+        Node* newRoot = root->right;
+        root->right = newRoot->left;
+        newRoot->left = root;
+        return newRoot;
+    }
+
+    Node* rightRotate(Node* root) {
+        Node* newRoot = root->left;
+        root->left = newRoot->right;
+        newRoot->right = root;
+        return newRoot;
+    }
+
+    Node* insert(Node* root, int player_id, int score) {
+        if (root == NULL) {
+            return new Node(player_id, score);
+        }
+
+        if (player_id < root->player_id) {
+            root->left = insert(root->left, player_id, score);
+        }
+        else if (player_id > root->player_id) {
+            root->right = insert(root->right, player_id, score);
+        }
+        else {
+            return root; 
+        }
+
+        int bf = balanceFactor(root);
+
+       if (bf > 1 && player_id < root->left->player_id) {
+            return rightRotate(root);
+        }
+        if (bf < -1 && player_id > root->right->player_id) {
+         return leftRotate(root);
+        }
+
+        if (bf > 1 && player_id > root->left->player_id) {
+          root->left = leftRotate(root->left);
+            return rightRotate(root);
+        }
+
+      if (bf < -1 && player_id < root->right->player_id) {
+            root->right = rightRotate(root->right);
+            return leftRotate(root);
+        }
+
+        return root;
+    }
+   
+ Node* search(Node* root, int player_id) {
+        if (root == NULL || root->player_id == player_id) return root;
+        if (root->player_id < player_id)
+        return search(root->right, player_id);
+        return search(root->left, player_id);
+    }
+
+    void inorder(Node* root) {
+            if (root == NULL) {
+                return;
+            }
+            inorder(root->left);
+            cout << "Player Id: " << root->player_id << "Score: " << root->score<<endl;
+            inorder(root->right);
+        }
+
+     void preorder(Node*root){
+          if (root == NULL) {
+                return;
+            }
+            
+            cout << "Player Id: " << root->player_id << "Score: " << root->score<<endl;
+            preorder(root->left);
+            preorder(root->right);
+        }
+    
+     void postorder(Node*root){
+          if (root == NULL) {
+                return;
+            }
+
+            postorder(root->left);
+            postorder(root->right);           
+            cout << "Player Id: " << root->player_id << "Score: " << root->score<<endl;
+        }
+    };
+
+   
+
+int main() {
+    AVL tree;
+    Node* root = NULL;
+    root = tree.insert(root, 1, 20);
+    root = tree.insert(root, 3, 50);
+    root = tree.insert(root, 5, 60);
+    root = tree.insert(root, 4, 20);
+    root = tree.insert(root, 2, 80);
+    root = tree.insert(root, 6, 20);
+    root = tree.insert(root, 7, 90);
+  
+   cout<<"Inoder Traversal"<<endl ;
+   tree.inorder(root);
+    
+    if (tree.search(root,7)){
+        cout<<"Player Found"<<endl;
+    }
+    else{
+        cout<<"Player Not Found"<<endl;
+    }
+    cout<<"Preorder Traversal"<<endl;
+    tree.preorder(root);
+
+    cout<<"Postorder Traversal"<<endl;
+    tree.postorder(root);
+    return 0;
+}
